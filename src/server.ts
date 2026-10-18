@@ -22,6 +22,7 @@ const server = createServer((req, res) => {
     return res.end(JSON.stringify(products));
   }
 
+  // GET /products/count
   if (req.method === "GET" && url.pathname === "/products/count") {
     res.writeHead(200);
     return res.end(JSON.stringify({ count: products.length }));
@@ -39,6 +40,36 @@ const server = createServer((req, res) => {
     return res.end(JSON.stringify(product));
   }
 
+  // POST /products
+if (req.method === "POST" && url.pathname === "/products") {
+  let body = "";
+
+  req.on("data", (chunk) => {
+    body += chunk; // collect each piece
+  });
+
+  req.on("end", () => {
+    try {
+      const data = JSON.parse(body);
+
+      if (typeof data.name !== "string" || typeof data.price !== "number") {
+        res.writeHead(400);
+        return res.end(JSON.stringify({ error: "name (string) and price (number) are required" }));
+      }
+
+      const newProduct = { id: products.length + 1, name: data.name, price: data.price };
+      products.push(newProduct);
+
+      res.writeHead(201); // 201 = Created
+      res.end(JSON.stringify(newProduct));
+    } catch {
+      res.writeHead(400);
+      res.end(JSON.stringify({ error: "Body must be valid JSON" }));
+    }
+  });
+
+  return; // stop here; the response is sent later, inside "end"
+}
   res.writeHead(404);
   res.end(JSON.stringify({ error: "Route not found" }));
 });
