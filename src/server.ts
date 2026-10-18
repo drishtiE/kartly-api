@@ -53,6 +53,27 @@ app.delete("/products/:id", (req, res) => {
 
 })
 
+app.put("/products/:id", (req,res) => {
+    const id = Number(req.params.id)
+    if (Number.isNaN(id)) {
+        res.status(400).json({error: "id must be a number"});
+        return;
+    }
+    const {name, price} = req.body ?? {};
+    if (typeof name !== "string" || typeof price !== "number") {
+    res.status(400).json({ error: "name should be a (string) and price should be a  (number)" });
+    return;
+  }
+  const index = products.findIndex((p) => p.id === id)
+  if (index === -1) {
+    res.status(404).json({error: "Product not found"});
+    return;
+  }
+  const updatedproduct = {id, name, price};
+   products[index] = updatedproduct;
+  res.status(200).json(updatedproduct);
+})
+
 app.post("/products", (req, res) => {
   const { name, price } = req.body ?? {};
   if (typeof name !== "string" || typeof price !== "number") {
